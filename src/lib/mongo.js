@@ -43,7 +43,16 @@ export async function getDb() {
 // hand to match — that's the accepted cost of staying decoupled.
 export const COLLECTIONS = {
   ABANDONED_CARTS: 'abandonedCarts_POS',
+  BUYER_PURCHASES: 'buyerPurchases_POS',
+  POS_SESSIONS:    'posSessions_POS',
+  WALKINS:         'walkins_POS',
   CUSTOMERS:       'customers_POS',
   RECENTLY_VIEWED: 'recentlyViewed_POS',
   WISHLIST:        'wishlist_POS',
+
+  // Admin-OWNED collections (written by lib/collector.js; lucira-pos never
+  // touches them, and the admin never writes to the POS's own ones above).
+  CHANGE_LOG:      'adminChangeLog',
+  SNAPSHOTS:       'adminSnapshots',
+  ADMIN_META:      'adminMeta',
 };

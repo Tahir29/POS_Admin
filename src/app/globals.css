@@ -1,16 +1,340 @@
+/* Theme tokens below (lines up to the end of `.dark`) are copied verbatim
+   from lucira-pos/src/app/globals.css so the admin and the POS render the
+   same shadcn components identically. If the POS theme changes, re-copy
+   that range rather than editing values here. */
 @import "tailwindcss";
-@import "datatables.net-dt/css/dataTables.dataTables.css";
-@import "datatables.net-responsive-dt/css/responsive.dataTables.css";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #f8f8f7;
-  --foreground: #1c1c1c;
-  --border: #e2e2e0;
-  --accent: #7c3f2e;
+/* ── Lucira Brand Fonts ─────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Figtree';
+  src: url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Figtree-VariableFont_wght.ttf?v=1779362620') format('truetype');
+  font-weight: 300 900;
+  font-style: normal;
+  font-display: swap;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+@font-face {
+  font-family: 'Figtree';
+  src: url('https://cdn.shopify.com/s/files/1/0739/8516/3482/files/Figtree-Italic-VariableFont_wght.ttf?v=1779362621') format('truetype');
+  font-weight: 300 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Dark mode variant ──────────────────────────────────────────────────── */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ── Tailwind theme tokens ──────────────────────────────────────────────── */
+
+@theme inline {
+  /* Fonts */
+  --font-sans:    var(--font-figtree);
+  /* Headings use Figtree, not Abhaya Libre — the serif read as mismatched
+     against the rest of the UI (user feedback 2026-07-26). */
+  --font-heading: var(--font-figtree);
+  --font-mono:    ui-monospace, monospace;
+  --font-figtree: var(--font-figtree);
+
+  /* Semantic color tokens → CSS vars */
+  --color-background:        var(--background);
+  --color-foreground:        var(--foreground);
+  --color-card:              var(--card);
+  --color-card-foreground:   var(--card-foreground);
+  --color-popover:           var(--popover);
+  --color-popover-foreground:var(--popover-foreground);
+  --color-primary:           var(--primary);
+  --color-primary-foreground:var(--primary-foreground);
+  --color-secondary:         var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted:             var(--muted);
+  --color-muted-foreground:  var(--muted-foreground);
+  --color-accent:            var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive:       var(--destructive);
+  --color-border:            var(--border);
+  --color-input:             var(--input);
+  --color-ring:              var(--ring);
+
+  /* Lucira brand tokens — usable as bg-brand-*, text-brand-* etc. */
+  --color-brand-primary:    var(--brand-primary);
+  --color-brand-accent:     var(--brand-accent);
+  --color-brand-cream:      var(--brand-cream);
+  --color-brand-blush:      var(--brand-blush);
+  --color-brand-surface:    var(--brand-surface);
+  --color-brand-muted:      var(--brand-muted);
+
+  /* Status tokens */
+  --color-status-in-stock:  var(--status-in-stock);
+  --color-status-made-order:var(--status-made-order);
+  --color-status-error:     var(--status-error);
+
+  /* Sidebar */
+  --color-sidebar:                    var(--sidebar);
+  --color-sidebar-foreground:         var(--sidebar-foreground);
+  --color-sidebar-primary:            var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent:             var(--sidebar-accent);
+  --color-sidebar-accent-foreground:  var(--sidebar-accent-foreground);
+  --color-sidebar-border:             var(--sidebar-border);
+  --color-sidebar-ring:               var(--sidebar-ring);
+
+  /* Chart — using brand palette */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Border radius scale — flattened 2026-08-23 to match lucirajewelry.com:
+     the marketing site uses a small, near-uniform corner radius everywhere
+     (~6px on product cards/badges/inputs; measured live against the real
+     site), not an escalating scale where bigger surfaces get progressively
+     rounder corners the way this app's rounded-xl/2xl cards/sheets used to.
+     Every tier below now resolves to the exact same value as --radius-sm
+     (still calc(var(--radius) * 0.6) = 6px at the current --radius: 0.625rem)
+     — every existing rounded-md/lg/xl/2xl/3xl/4xl class across the app
+     renders visually identical to rounded-sm with NO per-component class
+     changes needed, since they're all Tailwind utilities reading from this
+     one scale. rounded-full/rounded-none are separate Tailwind utilities
+     untouched by this — avatars, toggle switches, circular icon buttons,
+     spinners, and pill-shaped tabs/filters stay genuinely round, matching
+     how the brand site itself still uses a real pill shape for its one
+     rounded-full toggle chip. */
+  --radius-sm:  calc(var(--radius) * 0.6);
+  --radius-md:  var(--radius-sm);
+  --radius-lg:  var(--radius-sm);
+  --radius-xl:  var(--radius-sm);
+  --radius-2xl: var(--radius-sm);
+  --radius-3xl: var(--radius-sm);
+  --radius-4xl: var(--radius-sm);
+
+  /* Shadow scale — premium revamp (2026-07-22). None of these existed
+     before; Button/Card previously fell back to Tailwind's flat default
+     shadow-xs only. */
+  --shadow-xs:    var(--shadow-xs);
+  --shadow-sm:    var(--shadow-sm);
+  --shadow-md:    var(--shadow-md);
+  --shadow-lg:    var(--shadow-lg);
+  --shadow-hover: var(--shadow-hover);
+
+  /* Gradient tokens — only the ones actually in use survive here (decorative
+     CTA/sidebar/card-wash gradients were removed 2026-07-26 per explicit
+     "solid colors + shadows, not gradients" preference). Reference
+     var(--accent)/var(--status-made-order), so they auto-adjust in .dark
+     with no duplicate block needed. */
+  --background-image-grad-gold-sheen:    var(--grad-gold-sheen);
+  --background-image-grad-hairline:      var(--grad-hairline);
+  --background-image-grad-corner-wash:   var(--grad-corner-wash);
+
+  /* Motion timing — premium revamp. Wired from plain :root custom
+     properties (not defined inline here) so the same values are also
+     JS-readable — see src/lib/motion.js, which must stay numerically
+     identical to --motion-ease-premium/--motion-duration-* below. */
+  --ease-premium:      var(--motion-ease-premium);
+  --duration-micro:    var(--motion-duration-micro);
+  --duration-standard: var(--motion-duration-standard);
+  --duration-panel:    var(--motion-duration-panel);
+}
+
+/* ── :root — Light mode ─────────────────────────────────────────────────── */
+
+:root {
+  /* ── Lucira Brand Palette ─────────────────────────── */
+  --brand-primary:    #5A413F;   /* Deep burgundy  — CTAs, active nav, buttons  */
+  --brand-accent:     #B77767;   /* Terracotta     — badges, selections, hover   */
+  --brand-cream:      #FEF5F1;   /* Warm cream     — page/section backgrounds    */
+  --brand-blush:      #EFE5DE;   /* Soft blush     — offer pills, tags           */
+  --brand-surface:    #F9F9F9;   /* Off-white      — card/secondary surfaces     */
+  --brand-muted:      #FAFAFA;   /* Near white     — image backgrounds           */
+
+  /* ── Status Colors ───────────────────────────────── */
+  --status-in-stock:  #189351;   /* Green  — in stock, availability badges       */
+  --status-made-order:#AF7C3E;   /* Gold   — made-to-order, informational        */
+  --status-error:     #F83E50;   /* Red    — out of stock, errors, destructive   */
+
+  /* ── True-neutral gray scale — premium revamp (2026-07-22) ─────────────
+     Introduced specifically to fix the "everything reads brown" feedback:
+     --muted-foreground and --border/--input below used to be warm-tinted
+     hex values reused for ALL secondary text and hairlines app-wide, not
+     just deliberate brand accents. These are true neutrals (no hue bias)
+     at the same lightness, used only to re-derive the tokens just below —
+     don't reference --neutral-* directly in components, use the semantic
+     tokens (muted-foreground/border/input) as before. */
+  --neutral-100: #F4F4F5;
+  --neutral-200: #E4E4E7;
+  --neutral-400: #A1A1AA;
+  --neutral-500: #71717A;
+  --neutral-700: #3F3F46;
+
+  /* ── shadcn/ui semantic tokens → Lucira values ───── */
+  --background:          #FCFCFC;          /* Near-white app background (was warm cream #FEF5F1) */
+  --foreground:          #1C1210;          /* Near-black text                     */
+
+  --card:                #FFFFFF;          /* Pure white cards                    */
+  --card-foreground:     #1C1210;
+
+  --popover:             #FFFFFF;
+  --popover-foreground:  #1C1210;
+
+  --primary:             #5A413F;          /* Brand primary — buttons, CTAs       */
+  --primary-foreground:  #FEF5F1;          /* Cream text on primary               */
+
+  --secondary:           #EFE5DE;          /* Blush — secondary buttons/tags      */
+  --secondary-foreground:#5A413F;          /* Primary text on secondary           */
+
+  --muted:               #F5F5F5;          /* Surface muted (was #F9F9F9)         */
+  --muted-foreground:    #71717A;          /* True-neutral grey (was warm #8C7B78) */
+
+  --accent:              #B77767;          /* Terracotta accent                   */
+  --accent-foreground:   #FFFFFF;          /* White text on accent                */
+
+  --destructive:         #F83E50;          /* Error / out of stock red            */
+
+  --border:              #E4E4E7;          /* True-neutral border (was warm #E8DDD9) */
+  --input:               #E4E4E7;          /* Input border (was warm #E8DDD9)     */
+  --ring:                #B77767;          /* Focus ring — terracotta (deliberate accent, unchanged) */
+
+  /* ── Shadow scale — premium revamp. None existed before; Button/Card
+     fell back to Tailwind's flat default shadow-xs only. ──────────── */
+  --shadow-color-rgb: 28, 18, 16; /* matches --foreground */
+  --shadow-xs: 0 1px 2px 0 rgba(var(--shadow-color-rgb), 0.04);
+  --shadow-sm: 0 1px 3px 0 rgba(var(--shadow-color-rgb), 0.07), 0 1px 2px -1px rgba(var(--shadow-color-rgb), 0.06);
+  --shadow-md: 0 4px 8px -2px rgba(var(--shadow-color-rgb), 0.10), 0 2px 4px -2px rgba(var(--shadow-color-rgb), 0.06);
+  --shadow-lg: 0 12px 24px -6px rgba(var(--shadow-color-rgb), 0.14), 0 4px 8px -4px rgba(var(--shadow-color-rgb), 0.08);
+  --shadow-hover: 0 10px 20px -6px rgba(90, 65, 63, 0.22); /* brand-tinted lift, deliberate hover/active elevation */
+
+  /* ── Gradient tokens — solid colors + shadows preferred app-wide
+     (2026-07-26); only the few gradients still genuinely in use survive:
+     a status-gold sheen (Why Lucira / trust content), a hairline divider,
+     and 404's corner wash. --brand-cream is no longer wired to
+     --background; its job here is that rare decorative corner wash. ──── */
+  --grad-gold-sheen: linear-gradient(120deg, color-mix(in oklch, var(--status-made-order), white 35%) 0%, var(--status-made-order) 45%, color-mix(in oklch, var(--status-made-order), white 35%) 100%);
+  --grad-hairline: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+  --grad-corner-wash: radial-gradient(120% 120% at 100% 0%, var(--brand-cream) 0%, transparent 60%);
+
+  /* ── Motion timing — premium revamp. Plain runtime custom properties
+     (not just @theme inline) so the same values are JS-readable — see
+     src/lib/motion.js, which must stay numerically identical. ──────── */
+  --motion-ease-premium: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-duration-micro: 0.12s;
+  --motion-duration-standard: 0.2s;
+  --motion-duration-panel: 0.32s;
+
+  /* ── Sidebar ─────────────────────────────────────── */
+  /* Deep near-black brown (same value already used for dark-mode --sidebar/
+     --card below) — darker than plain --primary so the sidebar reads as its
+     own deliberate dark surface, matching the reference design. */
+  --sidebar:                     #2A1E1C;
+  --sidebar-foreground:          #FEF5F1;  /* Cream text in sidebar               */
+  --sidebar-primary:             #B77767;  /* Active nav item — terracotta        */
+  --sidebar-primary-foreground:  #FFFFFF;
+  --sidebar-accent:              #3D2B28;  /* Hover state in sidebar              */
+  --sidebar-accent-foreground:   #FEF5F1;
+  --sidebar-border:              oklch(1 0 0 / 10%); /* Subtle hairline on dark bg */
+  --sidebar-ring:                #B77767;
+
+  /* ── Charts — brand palette ──────────────────────── */
+  --chart-1: #5A413F;
+  --chart-2: #B77767;
+  --chart-3: #AF7C3E;
+  --chart-4: #189351;
+  --chart-5: #EFE5DE;
+
+  /* ── Base radius ─────────────────────────────────── */
+  --radius: 0.625rem;
+
+  /* ── Font families ───────────────────────────────── */
+  --font-figtree: 'Figtree', sans-serif;
+}
+
+/* ── Dark mode — kept minimal, POS is primarily light ───────────────────── */
+
+.dark {
+  --background:         #1C1210;
+  --foreground:         #FEF5F1;
+
+  --card:               #2A1E1C;
+  --card-foreground:    #FEF5F1;
+
+  --popover:            #2A1E1C;
+  --popover-foreground: #FEF5F1;
+
+  --primary:            #B77767;
+  --primary-foreground: #1C1210;
+
+  --secondary:          #3D2B28;
+  --secondary-foreground:#FEF5F1;
+
+  --muted:              #3D2B28;
+  --muted-foreground:   #B09490;
+
+  --accent:             #B77767;
+  --accent-foreground:  #1C1210;
+
+  --destructive:        #F83E50;
+
+  --border:             oklch(1 0 0 / 10%);
+  --input:              oklch(1 0 0 / 15%);
+  --ring:               #B77767;
+
+  /* Shadow scale — dark override. Shadows need a lighter, terracotta-tinted
+     glow on dark surfaces rather than the light-mode near-black shadow. */
+  --shadow-color-rgb: 0, 0, 0;
+  --shadow-hover: 0 10px 24px -6px rgba(183, 119, 103, 0.28);
+
+  --sidebar:                    #2A1E1C;
+  --sidebar-foreground:         #FEF5F1;
+  --sidebar-primary:            #B77767;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent:             #3D2B28;
+  --sidebar-accent-foreground:  #FEF5F1;
+  --sidebar-border:             oklch(1 0 0 / 10%);
+  --sidebar-ring:               #B77767;
+
+  --chart-1: #B77767;
+  --chart-2: #AF7C3E;
+  --chart-3: #189351;
+  --chart-4: #5A413F;
+  --chart-5: #3D2B28;
+}
+
+/* ── Base layer (admin's own) ───────────────────────────────────────────── */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-figtree);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Same Radix Select hidden-<select> positioning fix as lucira-pos's
+   globals.css — without it the off-screen native select can inflate page
+   height and add a stray scrollbar. */
+select[aria-hidden="true"][tabindex="-1"] {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
 }

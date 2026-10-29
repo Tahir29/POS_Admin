@@ -1,0 +1,20 @@
+import * as React from "react"
+
+const MOBILE_BREAKPOINT = 768
+const QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`
+
+// useSyncExternalStore instead of the shadcn template's useEffect+setState —
+// same behaviour, without the cascading-render lint error.
+function subscribe(onChange) {
+  const mql = window.matchMedia(QUERY)
+  mql.addEventListener("change", onChange)
+  return () => mql.removeEventListener("change", onChange)
+}
+
+export function useIsMobile() {
+  return React.useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(QUERY).matches,
+    () => false
+  )
+}
