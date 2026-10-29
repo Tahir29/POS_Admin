@@ -1,0 +1,27 @@
+{
+  "name": "lucira-pos-admin",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Standalone admin panel for viewing lucira-pos's own MongoDB data and OrnaVerse customer walk-in history. Deliberately a separate project from lucira-pos itself — see README.md.",
+  "scripts": {
+    "dev": "next dev -p 3030",
+    "build": "next build",
+    "start": "next start -p 3030",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "^16.2.7",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "mongodb": "^6.10.0",
+    "datatables.net-react": "^1.0.2",
+    "datatables.net-dt": "^3.0.2",
+    "datatables.net-responsive-dt": "^4.0.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "tailwindcss": "^4.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-next": "^16.2.7"
+  }
+}
