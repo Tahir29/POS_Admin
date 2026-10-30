@@ -2,7 +2,8 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
+import { clientLogout } from '@/lib/clientLogout';
 import {
   Activity, Eye, Footprints, GanttChart, Heart, History, IndianRupee, LayoutDashboard, LogIn, LogOut, Route, ShoppingCart, Store, Users,
 } from 'lucide-react';
@@ -86,12 +87,7 @@ function NavMenuWithFilters() {
 }
 
 export default function AppSidebar() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.replace('/login');
-  };
+  const handleLogout = () => clientLogout();
 
   return (
     <Sidebar>

@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getAdminSession } from '@/lib/requireAdminSession';
 import AppSidebar from '@/components/Sidebar';
+import IdleLogout from '@/components/IdleLogout';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { Separator } from '@/components/ui/separator';
 
@@ -22,6 +23,7 @@ export default async function DashboardLayout({ children }) {
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      <IdleLogout />
       <AppSidebar />
       <SidebarInset className="min-w-0">
         {/* Menu button on every size: a phone opens the sheet, a tablet or

@@ -15,7 +15,10 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 
 const SESSION_COOKIE_NAME = 'pos_admin_session';
-const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
+// Idle timeout: a token lives 15 minutes and is re-issued only on real user
+// activity (POST /api/auth/refresh from IdleLogout.jsx) — never by the
+// dashboard's background polling — so an unattended admin logs itself out.
+const SESSION_MAX_AGE_SECONDS = 15 * 60;
 
 function getSecret() {
   const secret = process.env.ADMIN_SESSION_SECRET;
@@ -70,6 +73,8 @@ export function verifySessionToken(token) {
   const username = payload.slice(0, separatorIndex);
   const expiresAt = Number(payload.slice(separatorIndex + 1));
   if (!Number.isFinite(expiresAt) || Date.now() > expiresAt) return null;
+  // Tokens signed under the old 7-day lifetime are refused rather than honoured for a week.
+  if (expiresAt - Date.now() > SESSION_MAX_AGE_SECONDS * 1000) return null;
 
   return { username };
 }
@@ -78,3 +83,15 @@ export const SESSION_COOKIE = {
   name: SESSION_COOKIE_NAME,
   maxAge: SESSION_MAX_AGE_SECONDS,
 };
+
+/** Set-Cookie value carrying a fresh session token for `username`. */
+export function sessionCookieHeader(username) {
+  return [
+    `${SESSION_COOKIE_NAME}=${createSessionToken(username)}`,
+    'Path=/',
+    'HttpOnly',
+    'SameSite=Lax',
+    process.env.NODE_ENV === 'production' ? 'Secure' : '',
+    `Max-Age=${SESSION_MAX_AGE_SECONDS}`,
+  ].filter(Boolean).join('; ');
+}

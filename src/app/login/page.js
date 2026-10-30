@@ -1,13 +1,27 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
+// Reading ?reason= needs a Suspense boundary; the fallback is the form without the notice.
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginForm />}>
+      <LoginFormWithReason />
+    </Suspense>
+  );
+}
+
+function LoginFormWithReason() {
+  const idle = useSearchParams().get('reason') === 'idle';
+  return <LoginForm notice={idle ? 'You were logged out after 15 minutes of inactivity.' : null} />;
+}
+
+function LoginForm({ notice = null }) {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -46,6 +60,7 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {notice && !error && <p role="status" className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">{notice}</p>}
             <div className="flex flex-col gap-2">
               <Label htmlFor="username">Username</Label>
               <Input

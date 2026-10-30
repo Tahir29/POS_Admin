@@ -2,7 +2,7 @@
 // login (ADMIN_USERNAME/ADMIN_PASSWORD, see .env.local) and, on success,
 // sets the signed session cookie every other route checks.
 
-import { createSessionToken, SESSION_COOKIE } from '@/lib/session';
+import { sessionCookieHeader } from '@/lib/session';
 
 export async function POST(request) {
   let body;
@@ -27,18 +27,7 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid username or password.' }, { status: 401 });
   }
 
-  const token = createSessionToken(username);
   const response = Response.json({ ok: true });
-  response.headers.append(
-    'Set-Cookie',
-    [
-      `${SESSION_COOKIE.name}=${token}`,
-      'Path=/',
-      'HttpOnly',
-      'SameSite=Lax',
-      process.env.NODE_ENV === 'production' ? 'Secure' : '',
-      `Max-Age=${SESSION_COOKIE.maxAge}`,
-    ].filter(Boolean).join('; ')
-  );
+  response.headers.append('Set-Cookie', sessionCookieHeader(username));
   return response;
 }
