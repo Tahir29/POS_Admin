@@ -43,6 +43,7 @@ import { STATUS_LABEL, resolveSession, sessionStoreLabel, sessionCompanyIds } fr
 import { duration, mobileKey } from './format';
 import { istDay } from './dayRange';
 import { getEmployeeNames, salespersonOf } from './employees';
+import { billTime, billDateRange } from './sales';
 
 export const MAX_EVENTS = 5000;
 const ORNAVERSE_TIMEOUT_MS = 6000;
@@ -131,7 +132,7 @@ export async function loadEvents(db, { from = null, to = null, mobile = null, st
       .find(mobile ? { mobileKey: mobile } : hasRange ? { updatedAt: range } : {})
       .toArray(),
     db.collection(COLLECTIONS.BUYER_PURCHASES)
-      .find({ ...LIVE_PURCHASES, ...(mobile ? { customerMobile: tail } : hasRange ? { documentDate: range } : {}) })
+      .find({ ...LIVE_PURCHASES, ...(mobile ? { customerMobile: tail } : hasRange ? { documentDate: billDateRange(from, to) } : {}) })
       .toArray(),
     db.collection(COLLECTIONS.CHANGE_LOG)
       .find(mobile ? { mobile } : hasRange ? { at: range } : {})
@@ -199,7 +200,7 @@ export async function loadEvents(db, { from = null, to = null, mobile = null, st
 
   for (const p of purchases) {
     push({
-      id: `doc-${p._id}`, at: p.documentDate, kind: p.documentType ?? 'invoice', type: 'sale', event: DOC_LABEL[p.documentType] ?? p.documentType,
+      id: `doc-${p._id}`, at: billTime(p), kind: p.documentType ?? 'invoice', type: 'sale', event: DOC_LABEL[p.documentType] ?? p.documentType,
       companyIds: p.companyId != null ? [p.companyId] : [], store: names.get(p.companyId) ?? p.storeName ?? storeOf(p.companyId), login: null,
       customer: p.customerName ?? null, mobile: mobileKey(p.customerMobile),
       detail: [p.documentNo, itemNames(p.items, 'item_name'), salespersonOf(p, employees) && `Salesperson: ${salespersonOf(p, employees)}`]

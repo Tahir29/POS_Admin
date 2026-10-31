@@ -3,7 +3,7 @@ import { getDb, COLLECTIONS } from '@/lib/mongo';
 import { LIVE_PURCHASES } from '@/lib/live';
 import { getStores, storeName } from '@/lib/stores';
 import { parseDayRange, parseStore } from '@/lib/dayRange';
-import { DOC_TYPES, discountOf, isCancelled, isDraft } from '@/lib/sales';
+import { DOC_TYPES, discountOf, isCancelled, isDraft, billTime, billDateRange } from '@/lib/sales';
 import { mobileKey } from '@/lib/format';
 import { getEmployeeNames, salespersonOf } from '@/lib/employees';
 
@@ -27,11 +27,13 @@ export async function GET(request) {
     db.collection(COLLECTIONS.BUYER_PURCHASES)
       .find({
         ...LIVE_PURCHASES,
-        documentDate: { $gte: range.from, $lt: range.to },
+        documentDate: billDateRange(range.from, range.to),
         ...(store != null && { companyId: store }),
       })
-      .sort({ documentDate: -1 })
-      .toArray(),
+      .toArray()
+      .then((rows) => rows
+        .filter((d) => { const t = billTime(d); return t >= range.from && t < range.to; })
+        .sort((a, b) => billTime(b) - billTime(a))),
   ]);
   const names = new Map(stores.map((s) => [s.companyId, s.name]));
 
@@ -104,7 +106,7 @@ export async function GET(request) {
     bySalesperson: [...bySalesperson.values()].map((r) => ({ id: r.salesperson, ...r })).sort((a, b) => b.amount - a.amount),
     documents: docs.filter((d) => !isDraft(d)).map((d) => ({
       id: String(d._id),
-      at: d.documentDate,
+      at: billTime(d),
       store: storeName(names, d.companyId) ?? d.storeName,
       type: d.documentType,
       documentNo: d.documentNo ?? null,

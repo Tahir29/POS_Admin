@@ -5,7 +5,7 @@ import { getDb, COLLECTIONS } from '@/lib/mongo';
 import { LIVE_SESSIONS, LIVE_PURCHASES } from '@/lib/live';
 import { getStores } from '@/lib/stores';
 import { summarizeStoreDays } from '@/lib/storeDays';
-import { COUNTED } from '@/lib/sales';
+import { COUNTED, billTime, billDateRange } from '@/lib/sales';
 import { parseDayRange, parseStore, istDay } from '@/lib/dayRange';
 
 // One row per store per day in the range (default today) — EVERY store, so a
@@ -30,14 +30,15 @@ export async function GET(request) {
       .toArray(),
     db.collection(COLLECTIONS.BUYER_PURCHASES)
       // Posted invoices only — cancelled/draft bills never count as sales (lib/sales.js).
-      .find({ ...LIVE_PURCHASES, ...COUNTED, documentType: 'invoice', documentDate: { $gte: range.from, $lt: range.to } })
-      .toArray(),
+      .find({ ...LIVE_PURCHASES, ...COUNTED, documentType: 'invoice', documentDate: billDateRange(range.from, range.to) })
+      .toArray()
+      .then((rows) => rows.filter((p) => { const t = billTime(p); return t >= range.from && t < range.to; })),
   ]);
 
   const summaries = summarizeStoreDays(sessions, stores);
   const sales = new Map();
   for (const p of invoices) {
-    const key = `${p.companyId}|${istDay(p.documentDate)}`;
+    const key = `${p.companyId}|${istDay(billTime(p))}`;
     const s = sales.get(key) ?? { invoices: 0, sales: 0 };
     s.invoices += 1;
     s.sales += Number(p.totalAmount) || 0;

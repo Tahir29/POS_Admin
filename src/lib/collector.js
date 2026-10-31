@@ -25,6 +25,7 @@
 
 import { COLLECTIONS } from './mongo';
 import { mobileKey } from './format';
+import { billTime } from './sales';
 
 const OVERLAP_MS = 2 * 60 * 1000; // re-read a little before the last run, so nothing slips between runs
 const MIN_INTERVAL_MS = 60 * 1000;
@@ -88,18 +89,22 @@ const SOURCES = [
     },
     async removed(before, { db, now }) {
       // A cart disappears on checkout OR when it's cleared. A sale for the
-      // same customer at/after the cart's last update tells which.
-      const since = new Date(new Date(before.updatedAt ?? now).getTime() - 60 * 60 * 1000);
-      const sale = before.mobile
-        ? await db.collection(COLLECTIONS.BUYER_PURCHASES).findOne(
-            { customerMobile: { $regex: `${before.mobile}$` }, documentDate: { $gte: since }, documentType: { $in: ['invoice', 'order'] } },
-            { sort: { documentDate: 1 } },
-          )
-        : null;
+      // same customer around the cart's last update tells which — the one
+      // nearest that update, so two carts in a row each get their own bill.
+      const cartAt = new Date(before.updatedAt ?? now).getTime();
+      const since = new Date(cartAt - 60 * 60 * 1000);
+      const candidates = before.mobile
+        ? await db.collection(COLLECTIONS.BUYER_PURCHASES)
+            .find({ customerMobile: { $regex: `${before.mobile}$` }, documentDate: { $gte: since }, documentType: { $in: ['invoice', 'order'] } })
+            .toArray()
+        : [];
+      const sale = candidates
+        .filter((s) => billTime(s).getTime() >= since.getTime())
+        .sort((a, b) => Math.abs(billTime(a) - cartAt) - Math.abs(billTime(b) - cartAt))[0];
       const names = Object.values(before.items).map((i) => i.name);
       const base = { ...pick(before), companyIds: before.companyId != null ? [before.companyId] : [] };
       return sale
-        ? [{ ...base, kind: 'cart_checked_out', event: 'Cart checked out', at: sale.documentDate, amount: sale.totalAmount, detail: `Became ${sale.documentType} ${sale.documentNo ?? ''}`.trim() }]
+        ? [{ ...base, kind: 'cart_checked_out', event: 'Cart checked out', at: billTime(sale), amount: sale.totalAmount, detail: `Became ${sale.documentType} ${sale.documentNo ?? ''}`.trim() }]
         : [{ ...base, kind: 'cart_cleared', event: 'Cart cleared — no sale', at: now, amount: before.total, detail: `${plural(names.length, 'item')}: ${names.join(', ')}` }];
     },
   },
